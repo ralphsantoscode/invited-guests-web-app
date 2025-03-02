@@ -1,0 +1,44 @@
+version: '3'
+
+volumes:
+  node_app_invited_guests:
+  postgres_data_invited_guests:
+  postgres_data_invited_guests_test:
+
+services:
+  # * Used for storing application data locally
+  postgres:
+    image: postgres:16.3-alpine3.20
+    restart: unless-stopped
+    ports:
+      - '5577:5432'
+    volumes:
+      - postgres_data_invited_guests:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: db
+      POSTGRES_PASSWORD: db
+      POSTGRES_DB: db
+
+  # * Used for running integration tests
+  postgres_test:
+    image: postgres:16.3-alpine3.20
+    restart: unless-stopped
+    ports:
+      - '5588:5432'
+    volumes:
+      - postgres_data_invited_guests_test:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: db
+      POSTGRES_PASSWORD: db
+      POSTGRES_DB: db
+        # * Node server
+  node:
+    env_file: .env
+    build:
+      context: ./
+      dockerfile: Dockerfile.local
+    restart: unless-stopped 
+    ports:
+      - '3007:3007'
+    volumes:
+      - node_app_invited_guests:/app
